@@ -8,6 +8,10 @@ function Task({ titulo, id }) {
     setChecked(!checked);
   }
 
+  function handleDelete() {
+    console.log(id);
+  }
+
   return (
     <div
       className="m-3 shadow bg-white rounded d-flex align-items-center justify-content-between p-3"
@@ -36,7 +40,7 @@ function Task({ titulo, id }) {
       <div>
         
         <i className="btn--edit p-2 m-1 fa-regular fa-pen-to-square" style={{cursor:"pointer"}}></i>
-        <i className="btn--remove p-2 m-1 fa-solid fa-trash" style={{cursor:"pointer"}}></i>
+        <i className="btn--remove p-2 m-1 fa-solid fa-trash" style={{cursor:"pointer"}} onClick={handleDelete}></i>
       </div>
     </div>
   );
