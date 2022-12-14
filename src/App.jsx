@@ -76,8 +76,8 @@ function App() {
     
     tasks.push(newTask);
     tasks.sort((a,b) => new Date(a.date) - new Date(b.date));
-    setShowToast(true);
     setTasks(tasks);
+    setShowToast(true);
     handleClose();
   };
 
@@ -86,8 +86,10 @@ function App() {
     tempTask.date = taskDate;
     let newTasks = tasks.filter((task) => task.key !== tempTask.id);
     newTasks.push(tempTask);
-    newTasks.sort((a,b) => new Date(a.date) - new Date(b.date));
-    setTaskDate(newTasks); 
+    setTasks(newTasks);
+    newTasks.sort((a,b) => new Date(b.date) - new Date(a.date));
+    setTasks(newTasks);
+
     taskKey = undefined;
     handleClose();
   }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Badge, Col, Row } from "react-bootstrap";
+import { Badge, Col } from "react-bootstrap";
 import "./Task.css";
 
 function Task({ titulo, id, handleDelete, handleEdit, deadline }) {
