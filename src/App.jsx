@@ -12,6 +12,8 @@ import {
 
 import Task from "./components/Task";
 
+let lastKey = 0;
+
 function App() {
   const [tasks, setTasks] = useState([]);
   const [formWidth, setFormWidth] = useState(window.innerWidth * 0.3);
@@ -34,6 +36,7 @@ function App() {
       titulo: tituloTarefa,
       data: Date.parse(dataTarefa),
       createdAt: Date.now(),
+      key: ++lastKey
     };
 
     setLastTask(novaTarefa.titulo);
@@ -49,14 +52,13 @@ function App() {
   };
 
   const [show, setShow] = useState(false);
-
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
   const [showToast, setShowToast] = useState(false);
 
   return (
     <>
-      <ToastContainer className="p-5" position="top-center">
+      <ToastContainer className="p-5" position="top-end">
         <Toast
           onClose={() => setShowToast(false)}
           show={showToast}
@@ -73,7 +75,7 @@ function App() {
 
         <Col className="m-5" style={{ height: "50vh" }}>
           {tasks.map((t) => (
-            <Task titulo={t.titulo} />
+            <Task titulo={t.titulo} key={t.key} id={t.key}/>
           ))}
         </Col>
       </Container>
