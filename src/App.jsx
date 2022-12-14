@@ -13,11 +13,20 @@ import {
 import Task from "./components/Task";
 
 let lastKey = 0;
+let taskKey = undefined;
 
 function App() {
   const [tasks, setTasks] = useState([]);
   const [formWidth, setFormWidth] = useState(window.innerWidth * 0.3);
   const [lastTask, setLastTask] = useState("");
+  const [taskTitle, setTaskTitle] = useState("");
+  const [taskDate, setTaskDate] = useState("");
+  const [show, setShow] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const [modalAction, setModalAction] = useState("");
+  const [formAction, setFormAction] = useState();
+
+  /* Configuração da largura do formulário */
 
   const getFormWidth = () =>
     setFormWidth(
@@ -28,33 +37,83 @@ function App() {
 
   window.addEventListener("resize", getFormWidth);
 
-  const [tituloTarefa, setTituloTarefa] = useState("");
-  const [dataTarefa, setDataTarefa] = useState("");
+  /** Submissão do formulário dentro do Modal
+   *  TODO Integrar com um back/api (Ainda inexistente kk)
+   */
 
-  const cadastrarTarefa = () => {
-    const novaTarefa = {
-      titulo: tituloTarefa,
-      data: Date.parse(dataTarefa),
-      createdAt: Date.now(),
-      key: ++lastKey
+  /* Controle da abertura e fechamento do modal */
+
+  const handleShow = (msg) => {
+    setTaskTitle("");
+    setTaskDate("");
+    setShow(true);
+    setModalAction(msg);
+  };
+  const handleClose = () => {
+    setShow(false);
+  };
+
+  const sort = (l) => {
+    l.sort((a,b) => new Date(b.date) - new Date(a.date));
+  }
+
+  const submitTask = () => {
+    handleShow("Cadastrar");
+    const tempTask = tasks.find((t) => t.key == taskKey);
+    if (tempTask) {
+      updateTask(tempTask);
+      tasks.sort((a,b) => new Date(b.date) - new Date(a.date));
+      setTasks(tasks);
+      return;
+    }
+    const newTask = {
+      title: taskTitle,
+      date: taskDate,
+      createdAt: new Date(),
+      key: ++lastKey,
     };
-
-    setLastTask(novaTarefa.titulo);
-
-    setTituloTarefa("");
-    setDataTarefa("");
-
-    tasks.push(novaTarefa);
-    setTasks(tasks);
-
+    setLastTask(newTask.title);
+    
+    tasks.push(newTask);
+    tasks.sort((a,b) => new Date(a.date) - new Date(b.date));
     setShowToast(true);
+    setTasks(tasks);
     handleClose();
   };
 
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  const [showToast, setShowToast] = useState(false);
+  const updateTask = (tempTask) => {
+    tempTask.title = taskTitle;
+    tempTask.date = taskDate;
+    let newTasks = tasks.filter((task) => task.key !== tempTask.id);
+    newTasks.push(tempTask);
+    newTasks.sort((a,b) => new Date(a.date) - new Date(b.date));
+    setTaskDate(newTasks); 
+    taskKey = undefined;
+    handleClose();
+  }
+
+  const newTask = () => {
+    setFormAction("Cadastrar");
+    handleShow("Cadastrar nova tarefa");
+  }
+
+  /**
+   *  Handlers de edição e remoção das tarefas ja cadastradas
+   * */
+  function handleDeleteTask(taskId) {
+    const tempTasks = tasks.filter((task) => task.key !== taskId);
+    setTasks(tempTasks);
+  }
+
+  function handleEditTask(taskId) {
+    handleShow("Editar tarefa");
+    setFormAction("Atualizar");
+    const tempTask = tasks.find((t) => t.key == taskId);
+    setTaskTitle(tempTask.title);
+    setTaskDate(tempTask.date);
+    taskKey = tempTask.key;
+    console.log(taskKey);
+  }
 
   return (
     <>
@@ -69,19 +128,30 @@ function App() {
         </Toast>
       </ToastContainer>
       <Container className="mt-5 d-flex flex-column align-items-center">
-        <Button variant="primary" onClick={handleShow}>
+        <Button
+          variant="primary"
+          onClick={newTask}
+        >
           Nova Tarefa
         </Button>
 
         <Col className="m-5" style={{ height: "50vh" }}>
-          {tasks.map((t) => (
-            <Task titulo={t.titulo} key={t.key} id={t.key}/>
+          {          
+          tasks.map((t) => (
+            <Task
+              titulo={t.title}
+              key={t.key}
+              id={t.key}
+              deadline={t.date}
+              handleDelete={handleDeleteTask}
+              handleEdit={handleEditTask}
+            />
           ))}
         </Col>
       </Container>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Cadastrar Nova Tarefa</Modal.Title>
+          <Modal.Title>{modalAction}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
           <Form className="d-flex flex-column">
@@ -89,8 +159,8 @@ function App() {
               <Form.Label>Título da tarefa</Form.Label>
               <Form.Control
                 type="text"
-                value={tituloTarefa}
-                onChange={(e) => setTituloTarefa(e.target.value)}
+                value={taskTitle}
+                onChange={(e) => setTaskTitle(e.target.value)}
                 placeholder="Título da Tarefa"
               />
             </Form.Group>
@@ -99,14 +169,14 @@ function App() {
               <Form.Label>Data da tarefa</Form.Label>
               <Form.Control
                 type="date"
-                value={dataTarefa}
-                onChange={(e) => setDataTarefa(e.target.value)}
+                value={taskDate}
+                onChange={(e) => setTaskDate(e.target.value)}
                 placeholder="Data da Tarefa"
               />
             </Form.Group>
 
-            <Button variant="success" onClick={cadastrarTarefa}>
-              Cadastrar
+            <Button variant="success" onClick={submitTask}>
+              {formAction}
             </Button>
           </Form>
         </Modal.Body>
